@@ -1,6 +1,6 @@
 # Data Center Planner
 
-**Preview** — interactive educational planner: stack facility blocks (GPU through site), derive power / cooling / network / space, program brief, Scale campus views, and illustrative Operate signals.
+An interactive educational planner with stack facility blocks (GPU through site).You can derive power / cooling / network / space, develop program brief, scale campus views, and look into illustrative operate signals.
 
 ```bash
 npm install
