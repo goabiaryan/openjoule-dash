@@ -1,7 +1,8 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: process.env.GITHUB_ACTIONS ? "/openjoule-dash/" : "/",
+  // Root custom domain (openjoule.org); relative base keeps github.io/openjoule-dash/ working too.
+  base: process.env.GITHUB_ACTIONS ? "./" : "/",
   root: ".",
   publicDir: "public",
   build: {
