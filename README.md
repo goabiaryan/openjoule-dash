@@ -9,7 +9,9 @@ npm run dev
 
 Open the URL Vite prints (usually `http://localhost:5173`).
 
-Tabs: **Build** · **Program** · **Scale** · **Operate**. Hash routes: `#build`, `#program`, `#scale`, `#operate` (`#size` → `#scale`, `#path` → `#operate`).
+Tabs: 
+
+**Build** · **Program** · **Scale** · **Operate**. 
 
 **Scale (high level):**
 
