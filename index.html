@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Data Center Planner</title>
+    <meta
+      name="description"
+      content="Interactive tool to assemble a GPU datacenter stack and derive power, liquid/air cooling, network hops, and hall layout. Illustrative ops views, not live monitoring."
+    />
+  </head>
+  <body class="app">
+    <header class="app-header">
+      <div class="wrap app-bar">
+        <div class="app-brand-row">
+          <span class="brand">Data Center Planner</span>
+          <span class="tag">Preview</span>
+        </div>
+        <nav class="app-tabs" aria-label="Views" role="tablist">
+          <button type="button" role="tab" class="app-tab" data-app-tab="build" aria-selected="true">Build</button>
+          <button type="button" role="tab" class="app-tab" data-app-tab="program">Program</button>
+          <button type="button" role="tab" class="app-tab" data-app-tab="scale" title="Scale power, cooling, network, and space from your Build stack">Scale</button>
+          <button type="button" role="tab" class="app-tab" data-app-tab="operate">Operate</button>
+        </nav>
+      </div>
+    </header>
+
+    <div class="app-site-meta">
+      <div class="wrap app-site-meta-inner">
+        <p class="app-intro-lede">
+          Interactive tool to assemble a GPU datacenter stack and derive power, liquid/air cooling, network hops, and hall layout.
+          <span class="app-intro-note">Illustrative ops views, not live monitoring.</span>
+        </p>
+      </div>
+    </div>
+
+    <main class="app-main wrap">
+      <div class="app-view is-active" data-view="build" id="view-build">
+        <div class="builder-grid">
+          <div class="builder-isa" id="isa-columns" aria-label="Stack layers · one column per layer"></div>
+          <aside class="builder-side">
+            <div class="context-panel" aria-label="Context"></div>
+            <div class="build-metrics" id="build-metrics"></div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="app-view" data-view="program" id="view-program">
+        <div class="program-layout">
+          <header class="program-header">
+            <div class="program-header-text">
+              <p class="program-eyebrow">Facility program</p>
+              <h2 class="program-title" id="program-title">-</h2>
+              <p class="program-sub" id="program-sub">-</p>
+            </div>
+          </header>
+
+          <section class="program-visual" aria-label="Facility schematic">
+            <div class="program-visual-hall">
+              <div class="program-visual-head">
+                <p class="program-visual-label">Live floor · driven by Build</p>
+                <span class="program-live-badge" id="program-live-badge">Live</span>
+              </div>
+              <div class="fig fig-hall-program">
+                <svg class="ch" id="svg-program-hall" role="img" aria-label="Hall floor plan"></svg>
+              </div>
+              <div class="program-hall-legend">
+                <span class="leg-pw">busway / power</span>
+                <span class="leg-cl">CHW / liquid</span>
+                <span class="leg-fb">fabric</span>
+                <span class="leg-hot">hot aisle</span>
+                <span class="leg-cold">cold aisle</span>
+              </div>
+              <div class="program-mix-legend" id="program-mix-legend" hidden></div>
+              <p class="program-visual-caption" id="program-visual-caption">-</p>
+            </div>
+            <div class="program-visual-rack">
+              <p class="program-visual-label">Rack section</p>
+              <div class="fig fig-rack-section">
+                <svg class="ch" id="svg-program-rack" role="img" aria-label="Rack cross section"></svg>
+              </div>
+            </div>
+            <div class="program-visual-mep">
+              <p class="program-visual-label">Utility → rack paths</p>
+              <div class="fig fig-mep fig-mep-program">
+                <svg class="ch mep" id="svg-mep" role="img" aria-label="Power and cooling paths"></svg>
+              </div>
+            </div>
+          </section>
+
+          <section class="program-dossier" aria-label="Program summary">
+            <div class="program-mission">
+              <div class="program-mission-head">
+                <h3 class="program-section-title">At a glance</h3>
+                <div id="program-readiness"></div>
+              </div>
+              <ul class="program-brief-lines" id="program-brief-lines"></ul>
+              <p class="visually-hidden" id="facility-brief">-</p>
+              <div class="program-mission-actions">
+                <button type="button" class="text-btn text-btn-primary" id="copy-brief">Copy full brief</button>
+              </div>
+            </div>
+
+            <div class="program-loadout-block">
+              <h3 class="program-section-title">Loadout <span class="program-section-hint">from Build · click to edit</span></h3>
+              <div class="program-loadout" id="program-loadout"></div>
+            </div>
+
+            <div class="program-armory-block">
+              <h3 class="program-section-title">Key quantities</h3>
+              <div class="program-armory" id="program-armory"></div>
+            </div>
+          </section>
+
+          <section class="program-followups">
+            <div class="program-open-wrap" id="program-open-wrap">
+              <h3 class="program-section-title">Open before DD</h3>
+              <div id="facility-warnings"></div>
+            </div>
+
+            <details class="program-details">
+              <summary>Bill of materials <span class="program-details-meta" id="bom-detail-count"></span></summary>
+              <div class="program-bom-wrap" id="facility-bom"></div>
+            </details>
+
+            <details class="program-details">
+              <summary>Commission checklist <span class="program-details-meta" id="comm-detail-count"></span></summary>
+              <div id="facility-commission"></div>
+            </details>
+          </section>
+        </div>
+      </div>
+
+      <div class="app-view" data-view="scale" id="view-scale">
+        <div class="context-panel" aria-label="Context"></div>
+        <div class="scale-page">
+          <header class="scale-page-head">
+            <p class="program-eyebrow">Scale · complete hall</p>
+            <h2 class="scale-page-title" id="size-title">-</h2>
+            <p class="scale-page-sub" id="size-sub">-</p>
+            <p class="scale-page-lede">Mirrors your Build stack · change blocks, GPU mix, or add-ons on Build and this view updates. Campus hall split, site plan, and isometric hall; layer toggles and rack detail apply to the hall diagram.</p>
+          </header>
+
+          <section class="scale-hall-visual program-visual" aria-label="Scale diagrams">
+            <div class="program-visual-head">
+              <p class="program-visual-label">Campus halls · site plan · hall isometric · layer toggles on hall</p>
+              <span class="program-live-badge" id="size-live-badge">Live</span>
+            </div>
+            <div class="scale-stage" id="scale-stage">
+              <div class="scale-two-diagrams">
+                <article class="scale-diagram-block scale-campus-block" aria-label="Campus halls overview">
+                  <h3 class="scale-diagram-title">1 · Campus · halls &amp; specs</h3>
+                  <p class="scale-diagram-lede">Choose campus IT capacity · halls = capacity ÷ your Build hall (IT MW) · diagram 3 is still one module.</p>
+                  <div class="scale-campus-bar" id="scale-campus-capacity-bar" role="group" aria-label="Campus IT capacity">
+                    <span class="scale-layer-label">Campus IT</span>
+                    <input type="range" class="scale-campus-mw-slider" id="scale-campus-mw" aria-valuemin="10" aria-valuemax="150" value="30" aria-describedby="scale-campus-halls-readout">
+                    <output class="scale-campus-mw-out" id="scale-campus-mw-out" for="scale-campus-mw">30 MW IT</output>
+                    <span class="scale-layer-divider" aria-hidden="true"></span>
+                    <button type="button" class="scale-campus-preset" data-campus-mw-preset="15" aria-pressed="false">15</button>
+                    <button type="button" class="scale-campus-preset" data-campus-mw-preset="30" aria-pressed="false">30</button>
+                    <button type="button" class="scale-campus-preset" data-campus-mw-preset="50" aria-pressed="false">50</button>
+                    <button type="button" class="scale-campus-preset" data-campus-mw-preset="75" aria-pressed="false">75</button>
+                    <button type="button" class="scale-campus-preset" data-campus-mw-preset="100" aria-pressed="false">100</button>
+                    <span class="scale-campus-halls-readout" id="scale-campus-halls-readout">→ 4 halls</span>
+                  </div>
+                  <div class="fig fig-scale-campus">
+                    <svg class="ch scale-campus" id="svg-scale-campus" role="img" aria-label="Campus halls and specifications"></svg>
+                  </div>
+                </article>
+
+                <article class="scale-diagram-block scale-site-block" aria-label="Site campus plan">
+                  <h3 class="scale-diagram-title">2 · Site · campus</h3>
+                  <p class="scale-diagram-lede">Ring road, parking, substation, plant · up to 12 hall footprints (A–L) · full hall count on diagram 1.</p>
+                  <div class="fig fig-scale-site">
+                    <svg class="ch scale-site" id="svg-scale-site" role="img" aria-label="Site campus plan"></svg>
+                  </div>
+                </article>
+
+                <article class="scale-diagram-block scale-hall-figure" id="scale-hall-figure" aria-label="Isometric data hall">
+                  <h3 class="scale-diagram-title">3 · Hall · isometric rows</h3>
+                  <p class="scale-diagram-lede">White-space layout · busway, CHW, fabric. Toggle a layer off to see illustrative impact on the hall; click a rack for detail.</p>
+                  <div class="scale-layer-bar" role="toolbar" aria-label="Hall diagram layers">
+                    <span class="scale-layer-label">Layers</span>
+                    <button type="button" class="scale-layer-btn active" data-scale-layer="space" aria-pressed="true">Space</button>
+                    <button type="button" class="scale-layer-btn active" data-scale-layer="power" aria-pressed="true">Power</button>
+                    <button type="button" class="scale-layer-btn active" data-scale-layer="cool" aria-pressed="true">Cooling</button>
+                    <button type="button" class="scale-layer-btn" data-scale-layer="net" aria-pressed="false">Network</button>
+                    <button type="button" class="scale-layer-btn scale-layer-all" data-scale-layer="all">All on</button>
+                    <span class="scale-layer-divider" aria-hidden="true"></span>
+                    <span class="scale-layer-label">Zoom</span>
+                    <button type="button" class="scale-zoom-btn" data-scale-zoom="out" aria-label="Zoom out">−</button>
+                    <button type="button" class="scale-zoom-btn scale-zoom-fit" data-scale-zoom="fit">Fit width</button>
+                    <button type="button" class="scale-zoom-btn" data-scale-zoom="in" aria-label="Zoom in">+</button>
+                  </div>
+                  <div class="scale-layer-stress-panel" id="scale-layer-stress-panel" role="status" aria-live="polite" hidden>
+                    <p class="scale-layer-stress-panel-title">Layer off · illustrative impact</p>
+                    <ul class="scale-layer-stress-list" id="scale-layer-stress-list"></ul>
+                  </div>
+                  <div class="fig fig-scale-hall">
+                    <div class="scale-svg-scroller" id="scale-svg-scroller">
+                      <svg class="ch scale-hall" id="svg-scale-hall" role="img" aria-label="Isometric data hall"></svg>
+                    </div>
+                    <div class="scale-rack-popover" id="scale-rack-popover" hidden aria-label="Rack detail">
+                      <div id="scale-rack-detail"></div>
+                    </div>
+                  </div>
+                  <p class="scale-hall-caption" id="scale-hall-caption">-</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section class="scale-deep">
+            <details class="program-details size-details">
+              <summary>Layer matrix &amp; network detail <span class="program-details-meta">matrix · path</span></summary>
+              <div class="matrix-wrap" id="matrix-wrap">
+                <div class="tbl size-tbl">
+                  <table class="mx" id="isa-matrix">
+                    <thead>
+                      <tr>
+                        <th class="matrix-col-layer">Layer</th>
+                        <th class="matrix-col-power matrix-lane-th" data-lane="power"><span class="lane l-p">Power</span></th>
+                        <th class="matrix-col-cool matrix-lane-th" data-lane="cool"><span class="lane l-c">Cooling</span></th>
+                        <th class="matrix-col-net matrix-lane-th" data-lane="net"><span class="lane l-n">Network</span></th>
+                        <th class="matrix-col-space matrix-lane-th" data-lane="space"><span class="lane l-s">Space</span></th>
+                      </tr>
+                    </thead>
+                    <tbody id="matrix-body"></tbody>
+                  </table>
+                </div>
+              </div>
+              <p class="size-panel-hint">Layer name → focus block on Build.</p>
+              <div class="fabric-panel fabric-panel-nested" id="fabric-panel">
+                <p class="fabric-panel-lede">Hops &amp; cables below · switch counts &amp; Gbps in the matrix Network column above.</p>
+                <div class="fabric-notes-wrap" id="fabric-notes"></div>
+                <div class="fig fig-fabric fig-fabric-sm">
+                  <svg class="ch fabric" id="svg-fabric" role="img" aria-label="Fabric hop summary"></svg>
+                </div>
+                <div class="fabric-cables-wrap" id="fabric-cables"></div>
+              </div>
+            </details>
+          </section>
+        </div>
+      </div>
+
+      <div class="app-view" data-view="operate" id="view-operate">
+        <div class="operate-page">
+          <div class="context-panel" aria-label="Context"></div>
+          <header class="operate-page-head scale-page-head">
+            <p class="program-eyebrow">Operate · after energize</p>
+            <h2 class="scale-page-title" id="operate-title">-</h2>
+            <p class="scale-page-sub" id="operate-sub">-</p>
+            <p class="scale-page-lede">
+              Steady-state ops after energize: what to watch in EPMS, DCIM, BMS, and NOC, aligned to Program and Scale. Pre-commission and DD checklists stay on <strong>Program</strong> (Commission checklist, Open before DD).
+            </p>
+          </header>
+
+          <section class="operate-section" aria-label="Illustrative dashboards">
+            <h3 class="panel-title">Sim · load test playground</h3>
+            <div id="operate-dashboards"></div>
+          </section>
+
+          <section class="operate-section" aria-label="Monitor by domain">
+            <h3 class="panel-title">What to monitor</h3>
+            <p class="operate-section-hint">Mini panels animate with the load-test playground above (same sim · distinct shapes per signal).</p>
+            <div class="operate-domain-grid" id="operate-domains"></div>
+          </section>
+
+          <section class="operate-section" aria-label="Tools and runbooks">
+            <h3 class="panel-title">How halls do it</h3>
+            <div id="operate-tools"></div>
+          </section>
+
+          <section class="operate-section" aria-label="Steady-state monitoring">
+            <h3 class="panel-title">Watch · fail by layer</h3>
+            <p class="operate-section-hint">Row → focus that stack layer on Build. Trace column = illustrative watch signals (same sim as above).</p>
+            <div class="tbl tbl-op-watch">
+              <table class="op">
+                <thead>
+                  <tr>
+                    <th>Layer</th>
+                    <th>Watch</th>
+                    <th>Trace</th>
+                    <th>Usual failure</th>
+                  </tr>
+                </thead>
+                <tbody id="op-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-site-footer">
+      <div class="wrap app-site-footer-inner">
+        <p class="app-site-credit">
+          Created by
+          <a href="https://abiaryan.com" rel="noopener noreferrer">Abi Aryan</a>
+          (for educational purposes only)
+        </p>
+      </div>
+    </footer>
+  </body>
+  <script type="module" src="/src/main.js"></script>
+</html>
