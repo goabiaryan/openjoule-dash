@@ -1,18 +1,16 @@
 # Data Center Planner
 
-An interactive educational planner with stack facility blocks (GPU through site).You can derive power / cooling / network / space, develop program brief, scale campus views, and look into illustrative operate signals.
+An interactive educational planner with stack facility blocks (GPU through site), derive power / cooling / network / space, program brief to scale campus views, with illustrative operate signals.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the URL Vite prints (usually `http://localhost:5173`).
 
 Tabs: 
 
 **Build** · **Program** · **Scale** · **Operate**. 
-
 **Scale (high level):**
 
 1. Campus IT capacity → hall count (your Build hall module repeats on site)
